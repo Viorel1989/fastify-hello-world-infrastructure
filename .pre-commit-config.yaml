@@ -24,10 +24,12 @@ repos:
         stages:
           - commit-msg
 
-- repo: https://github.com/antonbabenko/pre-commit-terraform
-  rev: v1.92.0
-  hooks:
-    - id: terraform_fmt
-    - id: terraform_validate
-    - id: terraform_tflint
-    - id: terraform_trivy
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.92.0
+    hooks:
+      - id: terraform_fmt
+      - id: terraform_validate
+      - id: terraform_tflint
+      - id: terraform_trivy
+        stages:
+        - commit-msg
