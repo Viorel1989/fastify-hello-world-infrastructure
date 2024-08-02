@@ -1,10 +1,6 @@
----
-default_install_hook_types:
-  - pre-commit
-  - commit-msg
-
 default_stages:
   - prepare-commit-msg
+  - commit
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -16,14 +12,12 @@ repos:
       - id: check-executables-have-shebangs
       - id: check-yaml
       - id: detect-private-key
-
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v3.25.0
     hooks:
       - id: commitizen
         stages:
           - commit-msg
-
   - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.92.0
     hooks:
@@ -31,5 +25,4 @@ repos:
       - id: terraform_validate
       - id: terraform_tflint
       - id: terraform_trivy
-        stages:
-        - commit-msg
+

@@ -1,16 +1,17 @@
 # Configure the required provider and version
 terraform {
+  required_version = ">= 1.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "=3.0.0"
     }
   }
-    backend "azurerm" {
-      resource_group_name  = "fastifyResourceGroup"
-      storage_account_name = "tffastifystate5606"
-      container_name       = "tffastifystate"
-      key                  = "terraform.tfstate"
+  backend "azurerm" {
+    resource_group_name  = "fastifyResourceGroup"
+    storage_account_name = "tffastifystate5606"
+    container_name       = "tffastifystate"
+    key                  = "terraform.tfstate"
   }
 }
 
@@ -18,20 +19,6 @@ terraform {
 provider "azurerm" {
   features {}
 }
-
-#Resource Group
-#VM image
-#Virtual Network
-#Subnet
-#Network Security Group
-#Public IP address
-#Network Interface
-#Virtual Machine
-#OS Disk
-#Boot Diagnostic Storage(optional)
-
-
-#TBD: service principal creation
 
 # Define the resource group
 data "azurerm_resource_group" "fastifyResourceGroup" {
@@ -113,8 +100,8 @@ resource "azurerm_network_security_group" "fastify-sg" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "3000"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
+    source_address_prefix      = "79.114.157.207"
+    destination_address_prefix = "10.0.0.0/16"
   }
 }
 
