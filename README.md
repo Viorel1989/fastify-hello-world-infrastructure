@@ -25,13 +25,14 @@ Run `terraform init` to install necessary Terraform packages:
 Run `terraform apply` to deploy infrastructure to Aazure:
 
 ```bash
-  terraform apply
+  terraform apply -var="ssh_user=$USER" -var="source_image_name={{SOURCE_IMAGE_NAME}}"
 ```
 
 Test the VM using the following command:
 
 ```
-    curl $(az vm list-ip-addresses --name fastify-hello-world --resource-group fastifyResourceGroup --query "[0].virtualMachine.network.publicIpAddresses[0].ipAddress" | jq -r):3000
+    curl http://$(az vm list-ip-addresses --name fastifyVM --resource-group fastifyResourceGroup --query "[1].virtualMachine.network.publicIpAddresses[0].ipAddress" -o tsv):3000
+
 ```
 
 Expected output:
@@ -41,6 +42,14 @@ Expected output:
   "hello": "world"
 }
 ```
+
+Destroy the VM using the following command:
+
+```
+    terraform destroy -var="ssh_user=$USER" -var="source_image_name={{SOURCE_IMAGE_NAME}}"
+
+```
+
 ## Install pre-commit hooks
 
 Before you start, make sure you have the following installed on your machine:
@@ -53,6 +62,26 @@ Before you start, make sure you have the following installed on your machine:
 
 ## Prerequisites
 
+Storage account for terraform state file
+
+https://learn.microsoft.com/en-us/azure/developer/terraform/store-state-in-azure-storage?tabs=azure-cli#2-configure-remote-state-storage-account
+
+```bash
+STORAGE_ACCOUNT_NAME=tfstate$(openssl rand -hex 4)
+CONTAINER_NAME=tfstate
+
+az provider register --namespace 'Microsoft.Storage'
+az storage account create --resource-group fastify-hello-world --name $STORAGE_ACCOUNT_NAME --sku Standard_LRS --encryption-services blob
+az storage container create --name $CONTAINER_NAME --account-name $STORAGE_ACCOUNT_NAME
+```
+
+Precommit installed to run pre-commit hooks
+
+```bash
+pip install pre-commit
+pre-commit --version
+pre-commit install
+```
 Install tflint and trivy locally in order for tflint pre-commit hook to run
 
 https://github.com/terraform-linters/tflint
