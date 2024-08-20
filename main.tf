@@ -1,8 +1,3 @@
-# Define local service port
-locals {
-  service_port = 3000
-}
-
 # Define the resource group
 data "azurerm_resource_group" "this" {
   name = var.resource_group_name
@@ -74,9 +69,9 @@ resource "azurerm_network_security_group" "default" {
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
-    source_port_range          = local.service_port
+    source_port_range          = var.service_port
     source_address_prefix      = "*"
-    destination_port_range     = local.service_port
+    destination_port_range     = var.service_port
     destination_address_prefix = azurerm_network_interface.public.private_ip_address
   }
 
@@ -111,8 +106,8 @@ data "azurerm_image" "this" {
 }
 
 # Define the virtual machine - creates the VM using the specified image and configuration
-resource "azurerm_linux_virtual_machine" "this" {
-  name                = data.azurerm_resource_group.this.name
+resource "azurerm_linux_virtual_machine" "fastifyVM" {
+  name                = "fastifyVM"
   resource_group_name = data.azurerm_resource_group.this.name
   location            = data.azurerm_resource_group.this.location
   size                = "Standard_B1S"
@@ -134,5 +129,19 @@ resource "azurerm_linux_virtual_machine" "this" {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
+
+  custom_data = base64encode(<<-EOT
+    #!/bin/bash
+
+    # Modify the systemd service file to include the environment variable
+    mkdir -p /etc/systemd/system/fastify-hello-world.service.d
+    echo "[Service]" > /etc/systemd/system/fastify-hello-world.service.d/env.conf
+    echo "Environment=PORT=${var.service_port}" >> /etc/systemd/system/fastify-hello-world.service.d/env.conf
+
+    # Reload systemd to apply changes
+    systemctl daemon-reload
+    systemctl restart fastify-hello-world.service
+  EOT
+  )
 
 }

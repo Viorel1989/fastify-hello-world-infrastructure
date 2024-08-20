@@ -9,8 +9,8 @@ terraform {
   }
   backend "azurerm" {
     resource_group_name  = "fastifyResourceGroup"
-    storage_account_name = "tffastifystate5606"
-    container_name       = "tffastifystate"
+    storage_account_name = "tfstateb7000d6c"
+    container_name       = "tfstate"
     key                  = "terraform.tfstate"
   }
 }

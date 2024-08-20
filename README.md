@@ -22,7 +22,7 @@ Run `terraform init` to install necessary Terraform packages:
   terraform init
 ```
 
-Run `terraform apply` to deploy infrastructure to Aazure:
+Run `terraform apply` to deploy infrastructure to Aazure (if no port variable is passed tf will use default):
 
 ```bash
   terraform apply -var="ssh_user=$USER" -var="source_image_name={{SOURCE_IMAGE_NAME}}"
@@ -71,7 +71,7 @@ STORAGE_ACCOUNT_NAME=tfstate$(openssl rand -hex 4)
 CONTAINER_NAME=tfstate
 
 az provider register --namespace 'Microsoft.Storage'
-az storage account create --resource-group fastify-hello-world --name $STORAGE_ACCOUNT_NAME --sku Standard_LRS --encryption-services blob
+az storage account create --resource-group fastifyResourceGroup --name $STORAGE_ACCOUNT_NAME --sku Standard_LRS --encryption-services blob
 az storage container create --name $CONTAINER_NAME --account-name $STORAGE_ACCOUNT_NAME
 ```
 
