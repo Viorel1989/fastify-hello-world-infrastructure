@@ -16,10 +16,11 @@ Go to the project directory:
   cd fastify-hello-world-infrastructure
 ```
 
-Run `terraform init` to install necessary Terraform packages:
+Run `terraform init` to install necessary Terraform packages and backend configuration parameters:
 
 ```bash
-  terraform init
+  terraform init \
+   -backend-config="storage_account_name=your-tf-storage-account-name"
 ```
 
 Run `terraform apply` to deploy infrastructure to Aazure (if no port variable is passed tf will use default):
