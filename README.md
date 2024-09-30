@@ -19,20 +19,22 @@ Go to the project directory:
 Run `terraform init` to install necessary Terraform packages and backend configuration parameters:
 
 ```bash
-  terraform init \
-   -backend-config="storage_account_name=your-tf-storage-account-name"
+  terraform init -backend-config="resource_group_name=$RESOURCE_GROUP_NAME"
+               -backend-config="storage_account_name=$STORAGE_ACCOUNT_NAME" \
+               -backend-config="container_name=$CONTAINER_NAME" \
+               -backend-config="key=terraform.tfstate"
 ```
 
 Run `terraform apply` to deploy infrastructure to Aazure (if no port variable is passed tf will use default):
 
 ```bash
-  terraform apply -var="ssh_user=$USER" -var="source_image_name={{SOURCE_IMAGE_NAME}}"
+  terraform apply -var="ssh_user=$USER" -var="source_image_name={{SOURCE_IMAGE_NAME}}" -var="resource_group_name=$RESOURCE_GROUP_NAME"
 ```
 
 Test the VM using the following command:
 
 ```
-    curl http://$(az vm list-ip-addresses --name fastifyVM --resource-group fastifyResourceGroup --query "[1].virtualMachine.network.publicIpAddresses[0].ipAddress" -o tsv):3000
+    curl http://$(az vm list-ip-addresses --name fastifyVM --resource-group $RESOURCE_GROUP_NAME --query "[1].virtualMachine.network.publicIpAddresses[0].ipAddress" -o tsv):3000
 
 ```
 
@@ -68,11 +70,12 @@ Storage account for terraform state file
 https://learn.microsoft.com/en-us/azure/developer/terraform/store-state-in-azure-storage?tabs=azure-cli#2-configure-remote-state-storage-account
 
 ```bash
+RESOURCE_GROUP_NAME=fastifyResourceGroup
 STORAGE_ACCOUNT_NAME=tfstate$(openssl rand -hex 4)
 CONTAINER_NAME=tfstate
 
 az provider register --namespace 'Microsoft.Storage'
-az storage account create --resource-group fastifyResourceGroup --name $STORAGE_ACCOUNT_NAME --sku Standard_LRS --encryption-services blob
+az storage account create --resource-group $RESOURCE_GROUP_NAME --name $STORAGE_ACCOUNT_NAME --sku Standard_LRS --encryption-services blob
 az storage container create --name $CONTAINER_NAME --account-name $STORAGE_ACCOUNT_NAME
 ```
 

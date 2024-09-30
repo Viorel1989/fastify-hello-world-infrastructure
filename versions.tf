@@ -7,11 +7,7 @@ terraform {
       version = "~> 3.113"
     }
   }
-  backend "azurerm" {
-    resource_group_name = "fastifyResourceGroup"
-    container_name      = "tfstate"
-    key                 = "terraform.tfstate"
-  }
+  backend "azurerm" {}
 }
 
 # Configure the Microsoft Azure Provider
