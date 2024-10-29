@@ -1,13 +1,11 @@
 variable "resource_group_name" {
   description = "The name of the Azure Resource Group"
   type        = string
-  default     = "fastifyResourceGroup"
 }
 
 variable "ssh_user" {
   description = "The username for the Virtual Machine"
   type        = string
-  default     = "viorel"
 }
 
 variable "ssh_key" {
@@ -25,7 +23,6 @@ variable "ssh_allowed_ips" {
 variable "source_image_name" {
   description = "The name of the image used to create the Virtual Machine"
   type        = string
-  default     = "fastifyVM-v1.1.2"
 }
 
 variable "service_port" {
