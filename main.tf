@@ -20,11 +20,12 @@ resource "azurerm_subnet" "private" {
 }
 
 # Define public IP - assigns a public IP address for internet access
-resource "azurerm_public_ip" "this" {
-  name                = data.azurerm_resource_group.this.name
+resource "azurerm_public_ip" "vm_public_ip" {
+  name                = "${data.azurerm_resource_group.this.name}-vm-public-ip"
   location            = data.azurerm_resource_group.this.location
   resource_group_name = data.azurerm_resource_group.this.name
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
+  sku                 = "Standard"
 }
 
 # Define network interface - allows the VM to communicate within the virtual network
@@ -40,6 +41,13 @@ resource "azurerm_network_interface" "private" {
   }
 }
 
+# Associate Network Interface to the Backend Pool of the Load Balancer
+resource "azurerm_network_interface_backend_address_pool_association" "my_nic_lb_pool" {
+  network_interface_id    = azurerm_network_interface.private.id
+  ip_configuration_name   = "private"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.my_lb_pool.id
+}
+
 
 # Define network interface for the public IP - associates the public IP with the network interface
 resource "azurerm_network_interface" "public" {
@@ -51,7 +59,7 @@ resource "azurerm_network_interface" "public" {
     name                          = "public"
     subnet_id                     = azurerm_subnet.private.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.this.id
+    public_ip_address_id          = azurerm_public_ip.vm_public_ip.id
   }
 }
 
@@ -144,4 +152,60 @@ resource "azurerm_linux_virtual_machine" "fastifyVM" {
   EOT
   )
 
+}
+
+
+# Create Public Load Balancer
+resource "azurerm_public_ip" "lb_public_ip" {
+  name                = "${data.azurerm_resource_group.this.name}-lb-public-ip"
+  location            = data.azurerm_resource_group.this.location
+  resource_group_name = data.azurerm_resource_group.this.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+}
+
+resource "azurerm_lb" "my_lb" {
+  name                = var.load_balancer_name
+  location            = data.azurerm_resource_group.this.location
+  resource_group_name = data.azurerm_resource_group.this.name
+  sku                 = "Standard"
+
+  frontend_ip_configuration {
+    name                 = var.public_ip_name
+    public_ip_address_id = azurerm_public_ip.lb_public_ip.id
+  }
+}
+
+resource "azurerm_lb_backend_address_pool" "my_lb_pool" {
+  loadbalancer_id = azurerm_lb.my_lb.id
+  name            = "test-pool"
+}
+
+resource "azurerm_lb_probe" "my_lb_probe" {
+  loadbalancer_id = azurerm_lb.my_lb.id
+  name            = "test-probe"
+  port            = 80
+}
+
+resource "azurerm_lb_rule" "my_lb_rule" {
+  loadbalancer_id                = azurerm_lb.my_lb.id
+  name                           = "test-rule"
+  protocol                       = "Tcp"
+  frontend_port                  = 80
+  backend_port                   = 80
+  disable_outbound_snat          = true
+  frontend_ip_configuration_name = var.public_ip_name
+  probe_id                       = azurerm_lb_probe.my_lb_probe.id
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.my_lb_pool.id]
+}
+
+resource "azurerm_lb_outbound_rule" "my_lboutbound_rule" {
+  name                    = "test-outbound"
+  loadbalancer_id         = azurerm_lb.my_lb.id
+  protocol                = "Tcp"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.my_lb_pool.id
+
+  frontend_ip_configuration {
+    name = var.public_ip_name
+  }
 }

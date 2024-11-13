@@ -1,11 +1,13 @@
 variable "resource_group_name" {
   description = "The name of the Azure Resource Group"
   type        = string
+  default     = "fastifyResourceGroup"
 }
 
 variable "ssh_user" {
   description = "The username for the Virtual Machine"
   type        = string
+  default     = "Viorel"
 }
 
 variable "ssh_key" {
@@ -23,10 +25,25 @@ variable "ssh_allowed_ips" {
 variable "source_image_name" {
   description = "The name of the image used to create the Virtual Machine"
   type        = string
+  default     = "fastifyVM-v1.1.2"
 }
 
 variable "service_port" {
   description = "The port number for the application."
   type        = number
   default     = 3000
+}
+
+###added from az tut
+
+variable "public_ip_name" {
+  description = "Name of the Public IP."
+  type        = string
+  default     = "test-public-ip"
+}
+
+variable "load_balancer_name" {
+  description = "The name of the load balancer"
+  type        = string
+  default     = "fastifyLB"
 }
